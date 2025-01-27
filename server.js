@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const port = 3000;
 
 // criação do app express
 const app = express();
@@ -13,12 +14,28 @@ app.use(cors());
 // gerenciamento de dados json
 app.use(bodyParser.json());
 
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'testing'
+});
+
+connection.connect((err) => {
+    if (err) {
+        console.error('Erro ao conectar: ' + err.stack);
+        return;
+    }
+    console.log('Conectado como id ' + connection.threadId);
+});
+
 // inserção dos dados do banco
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'testing'
+    database: 'testing',
+    uri: process.env.MYSQL_URL,
 });
 
 // conexão com o MySQL
@@ -28,6 +45,10 @@ db.connect(err => {
         return;
     }
     console.log('Conectado ao banco de dados');
+});
+
+app.get('/', (req, res) => {
+    res.send('Hello from Express!');
 });
 
 // rota de requisição
@@ -100,6 +121,6 @@ app.post('/check-user', (req, res) => {
 });
 
 // definição de porta
-app.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000');
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
 });
