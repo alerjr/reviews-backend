@@ -8,8 +8,14 @@ const port = process.env.PORT || 3000;
 // criação do app express
 const app = express();
 
+const corsOptions = {
+    origin: 'https://reviews-backend-six.vercel.app', // Substitua pelo domínio correto
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
 // utilização do cors
-app.use(cors());
+app.use(cors(corsOptions));
 
 // gerenciamento de dados json
 app.use(bodyParser.json());
