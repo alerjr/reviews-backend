@@ -3,7 +3,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const port = process.env.PORT || 3000; // Usar a porta do ambiente ou 3000 por padrão
+const port = process.env.PORT || 3000;
 
 // criação do app express
 const app = express();
@@ -14,29 +14,44 @@ app.use(cors());
 // gerenciamento de dados json
 app.use(bodyParser.json());
 
-// Configuração de conexão com o banco de dados
-const db = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',  // Usar DB_HOST no Railway, localhost em desenvolvimento local
-    user: process.env.DB_USER || 'root',      // Usuário do banco de dados
-    password: process.env.DB_PASSWORD || '',  // Senha do banco de dados
-    database: process.env.DB_NAME || 'testing', // Nome do banco de dados
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'testing'
 });
 
-// Conectar ao banco de dados
-db.connect((err) => {
+connection.connect((err) => {
+    if (err) {
+        console.error('Erro ao conectar: ' + err.stack);
+        return;
+    }
+    console.log('Conectado como id ' + connection.threadId);
+});
+
+// inserção dos dados do banco
+const db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'testing',
+    uri: process.env.MYSQL_URL,
+});
+
+// conexão com o MySQL
+db.connect(err => {
     if (err) {
         console.error('Erro ao conectar no banco de dados:', err);
         return;
     }
-    console.log('Conectado ao banco de dados com o id ' + db.threadId);
+    console.log('Conectado ao banco de dados');
 });
 
-// Rota de requisição
 app.get('/', (req, res) => {
     res.send('Hello from Express!');
 });
 
-// Rota para pegar dados do banco
+// rota de requisição
 app.get('/api/dados', (req, res) => {
     db.query('SELECT * FROM reviewdata', (err, results) => {
         if (err) {
@@ -46,7 +61,7 @@ app.get('/api/dados', (req, res) => {
     });
 });
 
-// Rota de pesquisa
+// rota de pesquisa
 app.get('/api/search', (req, res) => {
     const searchTerm = req.query.term;
 
@@ -64,7 +79,7 @@ app.get('/api/search', (req, res) => {
     });
 });
 
-// Rota de envio de dados
+// rota de envio de dados
 app.post('/submitForm', (req, res) => {
     const { name, lastName, email, phone, stars, reviewText } = req.body;
 
@@ -85,7 +100,7 @@ app.post('/submitForm', (req, res) => {
     })
 })
 
-// Rota de verificação de e-mail e telefone
+// rota de verificação de e-mail e telefone
 app.post('/check-user', (req, res) => {
     const { email, phone } = req.body;
 
@@ -105,7 +120,7 @@ app.post('/check-user', (req, res) => {
     });
 });
 
-// Iniciar o servidor
+// definição de porta
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
